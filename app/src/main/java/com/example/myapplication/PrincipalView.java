@@ -1,10 +1,16 @@
 package com.example.myapplication;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -33,6 +39,35 @@ public class PrincipalView extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText((Context) PrincipalView.this,contactList.get(position).getName(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                String contactInfo = contactList.get(position).toString();
+                SpannableString spannableString = new SpannableString(contactInfo);
+
+                // Mettre en couleur le prénom et le nom
+                int endOfName = contactList.get(position).getFirstName().length() + contactList.get(position).getName().length() + 1; // +1 pour l'espace entre prénom et nom
+                ForegroundColorSpan colorSpan = new ForegroundColorSpan(Color.GREEN);
+                spannableString.setSpan(colorSpan, 0, endOfName, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(PrincipalView.this);
+                builder.setTitle("Contact infos");
+
+                // Utilisez cette chaîne pour afficher dans une AlertDialog
+                builder.setMessage(spannableString);
+                builder.setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Fermer le dialogue
+                        dialog.dismiss();
+                    }
+                });
+
+                AlertDialog alert = builder.create();
+                alert.show();
+                return true;
             }
         });
 

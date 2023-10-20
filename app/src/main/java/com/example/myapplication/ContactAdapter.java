@@ -60,10 +60,17 @@ public class ContactAdapter extends BaseAdapter {
             layoutItem.setTag(viewHolder);
         }
         //(3) : Mise à jour des valeurs
-        viewHolder.tv_user.setText(list.get(position).getName());
-        int resID = context.getResources().getIdentifier("ic_contact","mipmap",context.getPackageName());
-        if (resID != 0)  viewHolder.img_user.setImageResource(resID);
-        else viewHolder.img_user.setImageResource(R.mipmap.ic_launcher);
+        viewHolder.tv_user.setText(list.get(position).getFirstName()+" "+list.get(position).getName().toUpperCase());
+        //initier l'icone à celle noire
+        int resID = R.mipmap.ic_contact_noir_foreground;
+
+        if ("M".equals(list.get(position).getGender())) {
+            resID = context.getResources().getIdentifier("ic_contact_vert_foreground", "mipmap", context.getPackageName());
+        } else if ("F".equals(list.get(position).getGender())) {
+            resID = context.getResources().getIdentifier("ic_contact_rouge_foreground", "mipmap", context.getPackageName());
+        }
+
+        viewHolder.img_user.setImageResource(resID);
         //On retourne l'item créé.
         return layoutItem;
     }
