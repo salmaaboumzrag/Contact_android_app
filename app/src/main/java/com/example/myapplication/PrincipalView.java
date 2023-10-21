@@ -38,13 +38,7 @@ public class PrincipalView extends AppCompatActivity {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText((Context) PrincipalView.this,contactList.get(position).getName(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                //Toast.makeText((Context) PrincipalView.this,contactList.get(position).getName(), Toast.LENGTH_SHORT).show();
                 String contactInfo = contactList.get(position).toString();
                 SpannableString spannableString = new SpannableString(contactInfo);
 
@@ -67,6 +61,15 @@ public class PrincipalView extends AppCompatActivity {
 
                 AlertDialog alert = builder.create();
                 alert.show();
+            }
+        });
+
+        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+
+                contactList.remove(position);
+                adapter.notifyDataSetChanged();//rafraichir l'affichage
                 return true;
             }
         });

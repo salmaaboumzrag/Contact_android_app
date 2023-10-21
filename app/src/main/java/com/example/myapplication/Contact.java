@@ -1,19 +1,10 @@
 package com.example.myapplication;
 
+import android.graphics.Bitmap;
+
 import java.io.Serializable;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
-
-//@Getter
-//@Setter
-//@AllArgsConstructor
-//@NoArgsConstructor
-//@ToString
 public class Contact implements Serializable {
     private String gender; // M or F
     private String name;
@@ -23,10 +14,12 @@ public class Contact implements Serializable {
     private String email;
     private String address;
     private String postalCode;
+    private transient Bitmap contactImage;
+
 
     // Constructor
     public Contact(String gender, String name, String firstName, String birthDate,
-                   String phone, String email, String address, String postalCode) {
+                   String phone, String email, String address, String postalCode, Bitmap contactImage) {
         this.gender = gender;
         this.name = name;
         this.firstName = firstName;
@@ -35,10 +28,18 @@ public class Contact implements Serializable {
         this.email = email;
         this.address = address;
         this.postalCode = postalCode;
+        this.contactImage = contactImage;
     }
 
 
     // Getter and Setter methods for Name
+    public Bitmap getContactImage() {
+        return contactImage;
+    }
+
+    public void setContactImage(Bitmap contactImage) {
+        this.contactImage = contactImage;
+    }
     public String getName() {
         return name;
     }
