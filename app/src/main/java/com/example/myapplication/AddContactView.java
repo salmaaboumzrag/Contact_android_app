@@ -2,11 +2,17 @@ package com.example.myapplication;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import static com.example.myapplication.PrincipalView.CONTACT_KEY;
 
 import android.app.DatePickerDialog;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -17,7 +23,11 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
+import android.Manifest;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,11 +35,13 @@ import java.util.regex.Pattern;
 public class AddContactView extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private Bitmap contactBitmap = null;
-    private EditText cName, cMail, cPhone,cPrenom,cDate,cCodePostal,cAdresse;
+    private Bitmap contactBitmap;
+    private String imagePath;
+    private EditText cName, cMail, cPhone, cPrenom, cDate, cCodePostal, cAdresse;
     private RadioGroup radioGroupGender;
     private String selectedGender;
-    private ImageView cameraIcon;
+    private ImageView cameraIcon, avatar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,15 +55,20 @@ public class AddContactView extends AppCompatActivity {
         cCodePostal = (EditText) findViewById(R.id.cCodePostal);
         cAdresse = (EditText) findViewById(R.id.cAdresse);
         radioGroupGender = findViewById(R.id.radioGroupSex);
+        avatar = findViewById(R.id.avatar);
         cameraIcon = findViewById(R.id.cameraIcon);
 
 
         cameraIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                // Vérifier si la permission est déjà accordée
+                if (ContextCompat.checkSelfPermission(AddContactView.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    // Si la permission n'est pas accordée, demandez-la
+                    ActivityCompat.requestPermissions(AddContactView.this, new String[]{Manifest.permission.CAMERA}, REQUEST_IMAGE_CAPTURE);
+                } else {
+                    // Si la permission est accordée, lancez la caméra
+                    launchCamera();
                 }
             }
         });
@@ -94,11 +111,12 @@ public class AddContactView extends AppCompatActivity {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             contactBitmap = (Bitmap) extras.get("data");
-            cameraIcon.setImageBitmap(contactBitmap); // Show thumbnail in ImageView
+            avatar.setImageBitmap(contactBitmap); // Show thumbnail in ImageView
+
         }
     }
 
-    public void validateClick (View view){
+    public void validateClick(View view) {
         boolean saisie = true;
 
         if (cName.getText().toString().isEmpty()) {
@@ -118,10 +136,10 @@ public class AddContactView extends AppCompatActivity {
             Toast.makeText(AddContactView.this, "Invalid firstName !", Toast.LENGTH_SHORT).show();
             saisie = false;
             cPrenom.setText("");
-            }
+        }
 
 
-        if (!cMail.getText().toString().isEmpty() &&!verifyEmail(cMail.getText().toString())) {
+        if (!cMail.getText().toString().isEmpty() && !verifyEmail(cMail.getText().toString())) {
             Toast.makeText(AddContactView.this, "Invalid mail !", Toast.LENGTH_SHORT).show();
             saisie = false;
             cMail.setText("");
@@ -136,22 +154,26 @@ public class AddContactView extends AppCompatActivity {
             saisie = false;
         }
 
-        if (!cCodePostal.getText().toString().isEmpty() &&!verifyPostalCode(cCodePostal.getText().toString())) {
+        if (!cCodePostal.getText().toString().isEmpty() && !verifyPostalCode(cCodePostal.getText().toString())) {
             Toast.makeText(AddContactView.this, "Invalid CP !", Toast.LENGTH_SHORT).show();
             saisie = false;
             cPhone.setText("");
         }
-        if(saisie) {
+        if (saisie) {
+
+            // Save the contact image to a temporary file
+            if (contactBitmap != null) {
+                String uniqueImageName = "contact_image_" + System.currentTimeMillis() + ".png"; // Unique file name
+                File imageFile = saveImageToInternalStorage(contactBitmap, uniqueImageName);
+                if (imageFile != null) {
+                    imagePath = imageFile.getAbsolutePath();
+                }
+            }
 
             Intent backIntent = new Intent();
-            Contact contact = new Contact(selectedGender,
-                    cName.getText().toString(), cPrenom.getText().toString(),
-                    cDate.getText().toString(), cPhone.getText().toString(),
-                    cMail.getText().toString(), cAdresse.getText().toString(),
-                    cCodePostal.getText().toString(), contactBitmap);
-
-            backIntent.putExtra(CONTACT_KEY,contact);
-            setResult(RESULT_OK,backIntent);
+            Contact contact = new Contact(selectedGender, cName.getText().toString(), cPrenom.getText().toString(), cDate.getText().toString(), cPhone.getText().toString(), cMail.getText().toString(), cAdresse.getText().toString(), cCodePostal.getText().toString(), imagePath);
+            backIntent.putExtra(CONTACT_KEY, contact);
+            setResult(RESULT_OK, backIntent);
 
 
             String ajout_message = "Le contact " + cName.getText().toString() + " est ajouté !";
@@ -163,6 +185,33 @@ public class AddContactView extends AppCompatActivity {
 
     }
 
+    private File saveImageToInternalStorage(Bitmap bitmap, String fileName) {
+        ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
+        // Specify the directory where you want to save the image
+        File directory = contextWrapper.getDir("images", Context.MODE_PRIVATE);
+
+        // Create a unique file name for the image
+        File imageFile = new File(directory, fileName);
+
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(imageFile);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null; // Error occurred while saving the image
+        } finally {
+            try {
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return imageFile;
+    }
 
 
     public boolean verifyNameOrSurname(String text) {
@@ -182,11 +231,17 @@ public class AddContactView extends AppCompatActivity {
     public boolean verifyPhone(String phone) {
         return phone.matches("^\\+?[0-9]+$");
     }
+
     public boolean verifyPostalCode(String postalCode) {
         return postalCode.matches("^[0-9]{5}$");
     }
 
-
+    private void launchCamera() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
+    }
 
 }
 

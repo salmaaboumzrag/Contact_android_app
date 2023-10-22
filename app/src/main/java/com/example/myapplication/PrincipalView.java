@@ -23,9 +23,10 @@ import java.util.ArrayList;
 
 public class PrincipalView extends AppCompatActivity {
 
-    public static final String CONTACT_KEY ="key_contact";
+    public static final String CONTACT_KEY = "key_contact";
     private ArrayList<Contact> contactList = new ArrayList<>();
     ContactAdapter adapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,14 +87,14 @@ public class PrincipalView extends AppCompatActivity {
 
     public void addContact(View view) {
         Intent intent = new Intent(PrincipalView.this, AddContactView.class);
-        startActivityForResult(intent,  100);
+        startActivityForResult(intent, 100);
 
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode ==RESULT_OK && requestCode==100){
+        if (resultCode == RESULT_OK && requestCode == 100) {
             Contact contact = (Contact) data.getSerializableExtra(CONTACT_KEY);
             contactList.add(contact);
             adapter.notifyDataSetChanged();

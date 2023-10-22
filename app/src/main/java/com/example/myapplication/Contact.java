@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 
 import java.io.Serializable;
 
-
 public class Contact implements Serializable {
     private String gender; // M or F
     private String name;
@@ -14,12 +13,10 @@ public class Contact implements Serializable {
     private String email;
     private String address;
     private String postalCode;
-    private transient Bitmap contactImage;
+    private String contactImagePath;
 
-
-    // Constructor
     public Contact(String gender, String name, String firstName, String birthDate,
-                   String phone, String email, String address, String postalCode, Bitmap contactImage) {
+                   String phone, String email, String address, String postalCode, String contactImagePath) {
         this.gender = gender;
         this.name = name;
         this.firstName = firstName;
@@ -28,18 +25,18 @@ public class Contact implements Serializable {
         this.email = email;
         this.address = address;
         this.postalCode = postalCode;
-        this.contactImage = contactImage;
+        this.contactImagePath = contactImagePath;
     }
 
-
-    // Getter and Setter methods for Name
-    public Bitmap getContactImage() {
-        return contactImage;
+    // Getters and Setters
+    public String getGender() {
+        return gender;
     }
 
-    public void setContactImage(Bitmap contactImage) {
-        this.contactImage = contactImage;
+    public void setGender(String gender) {
+        this.gender = gender;
     }
+
     public String getName() {
         return name;
     }
@@ -48,16 +45,22 @@ public class Contact implements Serializable {
         this.name = name;
     }
 
-    // Getter and Setter methods for Email
-    public String getEmail() {
-        return email;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    // Getter and Setter methods for Phone
+    public String getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(String birthDate) {
+        this.birthDate = birthDate;
+    }
+
     public String getPhone() {
         return phone;
     }
@@ -66,57 +69,46 @@ public class Contact implements Serializable {
         this.phone = phone;
     }
 
-    public String getGender() {
-        return gender;
+    public String getEmail() {
+        return email;
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getBirthDate() {
-        return birthDate;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getAddress() {
         return address;
     }
 
-    public String getPostalCode() {
-        return postalCode;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public void setBirthDate(String birthDate) {
-        this.birthDate = birthDate;
-    }
-
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
     }
 
     public void setPostalCode(String postalCode) {
         this.postalCode = postalCode;
     }
 
+    public String getContactImagePath() {
+        return contactImagePath;
+    }
+
+    public void setContactImagePath(String contactImagePath) {
+        this.contactImagePath = contactImagePath;
+    }
+
     @Override
     public String toString() {
-        return firstName + " " + name.toUpperCase()+'\n' +'\n' +
+        return firstName + " " + name.toUpperCase() + '\n' + '\n' +
                 "   Gender: " + gender + '\n' +
                 "   Birth Date: " + birthDate + '\n' +
                 "   Phone: " + phone + '\n' +
                 "   Email: " + email + '\n' +
                 "   Address: " + address + '\n' +
-                "   Postal Code: " + postalCode ;
+                "   Postal Code: " + postalCode;
     }
-
 }
-
-
